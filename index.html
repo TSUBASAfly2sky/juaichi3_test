@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>中古車掲載登録デモ | おもしろカーズ</title>
+<style>
+:root{color-scheme:light;--navy:#142747;--blue:#2050a4;--line:#d7e0ec;--muted:#52647c;--paper:#f2f5fa;--ink:#172941}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.55 "Hiragino Sans","Yu Gothic",Meiryo,sans-serif}
+header{background:var(--navy);color:white;padding:15px clamp(18px,4vw,64px);display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand{font-weight:750;font-size:17px;letter-spacing:.025em}.dealer{font-size:13px;color:#dbe7fc}
+main{max-width:1190px;margin:auto;padding:22px 26px 44px}
+.crumb{font-size:12px;color:var(--muted);margin:0 0 8px}
+.title{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+h1{font-size:clamp(26px,4vw,36px);line-height:1.25;margin:0;letter-spacing:-.04em}
+.tag{font-size:12px;font-weight:700;color:#78520c;background:#fff2d4;border:1px solid #eed9a4;border-radius:4px;padding:4px 9px;white-space:nowrap}
+.notice{margin:0 0 18px;color:var(--muted);font-size:13px}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 278px;gap:20px;align-items:start}
+.panel{background:white;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.panel-head{background:#f9fbfe;border-bottom:1px solid var(--line);padding:12px 18px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+h2{font-size:16px;line-height:1.4;margin:0}
+.fields{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:13px 14px;padding:15px 18px}
+.field{grid-column:span 2;min-width:0}.wide{grid-column:1/-1}
+label{display:block;font-weight:700;font-size:13px;margin:0 0 5px}
+input,textarea,select,button{font:inherit}
+input,textarea,select{width:100%;min-width:0;border:1px solid #a8b8cf;background:white;color:var(--ink);border-radius:5px;padding:8px 10px;line-height:1.35}
+input,select{height:39px}
+textarea{min-height:72px;resize:vertical}
+input::placeholder,textarea::placeholder{color:#64748b}
+input:focus,textarea:focus,select:focus,button:focus-visible{outline:3px solid #93b8f4;outline-offset:2px}
+.filled{background:#edf5ff;border-color:#5789d2}
+.unit{position:relative}.unit input{padding-right:44px}.unit span{position:absolute;right:10px;top:9px;font-size:12px;color:var(--muted);pointer-events:none}
+.meta{display:flex;justify-content:space-between;gap:6px;align-items:center}.hint{font-size:12px;font-weight:400;color:var(--muted)}
+.actions{border-top:1px solid var(--line);padding:12px 18px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+button{cursor:pointer;border:1px solid #91a5c4;background:white;color:var(--navy);padding:8px 13px;border-radius:5px;font-weight:700;font-size:13px}
+button:hover{background:#f0f5ff}.primary{background:var(--blue);color:white;border-color:var(--blue)}.primary:hover{background:#183c7d}
+.sidebar{position:sticky;top:16px}
+.source{padding:0 16px 16px}
+dl{margin:0}
+.source dl div{display:flex;justify-content:space-between;gap:8px;padding:10px 0;border-bottom:1px solid #e7edf5}
+dt{color:var(--muted);font-size:12px}dd{margin:0;text-align:right;font-weight:700;font-size:13px}
+.source p{font-size:12px;color:var(--muted);margin:12px 0}
+.source button{width:100%}.feedback{margin:0;color:#255135;font-size:12px;min-height:18px}
+.status{font-size:12px;color:var(--muted)}
+dialog{width:min(580px,calc(100% - 32px));color:var(--ink);border:1px solid var(--line);border-radius:9px;padding:18px 22px}
+dialog::backdrop{background:#0c1e3b88}
+.review-list{display:grid;grid-template-columns:minmax(90px,1fr) 2fr;gap:8px 16px;margin:16px 0}.review-list dd{text-align:left;overflow-wrap:anywhere}
+#manual-prompt textarea{min-height:135px}
+@media(max-width:840px){.layout{grid-template-columns:1fr}.sidebar{position:static;order:-1}.source dl{display:grid;grid-template-columns:repeat(3,1fr);gap:0 12px}}
+@media(max-width:550px){main{padding:18px 12px}.dealer{display:none}.fields{padding:12px;gap:12px}.field{grid-column:span 3}.wide{grid-column:1/-1}.source dl{grid-template-columns:1fr 1fr}}
+
+.section-links{display:flex;flex-wrap:wrap;gap:7px;padding:12px 18px;border-bottom:1px solid var(--line)}
+.section-links a{color:var(--blue);font-size:12px;padding:4px 8px;border-radius:4px;background:#eef4ff;text-decoration:none}
+.section-links a:hover{text-decoration:underline}
+.form-section{border-bottom:1px solid var(--line);scroll-margin-top:12px}
+.form-section h3{font-size:15px;margin:0;padding:10px 18px 0}
+.actions{position:sticky;bottom:0;background:#fff;z-index:1}
+dialog{max-height:85vh;overflow:auto}
+</style>
+</head>
+<body>
+<header><div class="brand">販売店管理ポータル</div><div class="dealer">おもしろカーズ｜講習用アカウント</div></header>
+<main>
+  <p class="crumb">在庫管理 › 車両掲載 › 新規登録</p>
+  <div class="title"><h1>中古車の新規掲載</h1><span class="tag">JU愛知 講習デモ</span></div>
+  <p class="notice">中古車情報サイトの販売店業務を想定した架空の登録フォームです。入力内容はこの画面で確認できます。</p>
+  <div class="layout">
+    <form id="listing" class="panel" autocomplete="off">
+      <div class="panel-head"><h2>掲載情報</h2><span class="status" id="progress" aria-live="polite">入力済み 0 項目</span></div>
+      <nav class="section-links" id="section-links" aria-label="入力セクション"></nav>
+      <div id="sections"></div>
+      <div class="actions">
+        <button type="reset">入力をクリア</button>
+        <button type="submit" class="primary">入力内容を確認</button>
+      </div>
+    </form>
+    <aside class="panel sidebar" aria-labelledby="source-heading">
+      <div class="panel-head"><h2 id="source-heading">架空車両の元データ</h2></div>
+      <div class="source">
+        <dl><div><dt>管理番号</dt><dd>A-01</dd></div><div><dt>年式</dt><dd>2020年</dd></div><div><dt>走行距離</dt><dd>42,300 km</dd></div></dl>
+        <p>左後ろのドアに小傷。支払総額・修復歴・ナビの動作は要確認。指示文には基本スペックと装備の追加サンプルも含まれます。</p>
+        <button type="button" id="copy">Codex用の指示をコピー</button>
+        <p class="feedback" id="feedback" role="status"></p>
+      </div>
+    </aside>
+  </div>
+</main>
+<dialog id="review" aria-labelledby="review-heading">
+  <h2 id="review-heading">入力内容の確認</h2>
+  <dl class="review-list" id="review-list"></dl>
+  <form method="dialog"><button>入力画面に戻る</button></form>
+</dialog>
+<dialog id="manual-prompt" aria-labelledby="prompt-heading">
+  <h2 id="prompt-heading">Codexに貼り付ける指示文</h2>
+  <textarea id="prompt-text" readonly aria-label="Codex用の指示文"></textarea>
+  <form method="dialog"><button>閉じる</button></form>
+</dialog>
+<script>
+const form = document.getElementById('listing');
+const yesNo = ['あり', 'なし'];
+// [項目ID, 画面のラベル, 入力形式, 単位]
+const groups = [
+  ['basic','車両の基本情報',[
+    ['stock','管理番号'],['make','メーカー'],['model','車種'],['grade','グレード'],
+    ['year','年式','number','年'],['first-month','初度登録月','month'],
+    ['body','ボディタイプ',['ハッチバック','セダン','SUV','ミニバン','ワゴン','クーペ','軽自動車','その他']],
+    ['color','ボディカラー'],['color-code','カラーコード'],['model-code','型式'],
+    ['displacement','排気量','number','cc'],['drive','駆動方式',['2WD','4WD']],
+    ['transmission','ミッション',['AT','CVT','MT','その他']],['fuel','燃料',['ガソリン','ディーゼル','ハイブリッド','電気','その他']],
+    ['steering','ハンドル',['右','左']],['doors','ドア数','number','枚'],['capacity','乗車定員','number','人'],
+    ['chassis-end','車台番号末尾（3桁）']
+  ]],
+  ['condition','走行・車両状態',[
+    ['mileage','走行距離','number','km'],['repair','修復歴',yesNo],
+    ['inspection','車検',['車検あり','車検整備付','車検なし']],['inspection-expiry','車検満了月','month'],
+    ['owner','ワンオーナー',yesNo],['smoke','禁煙車',yesNo],['records','定期点検記録簿',yesNo],
+    ['rental','レンタカー使用歴',yesNo],['test-drive','試乗車',yesNo],['unused','登録済未使用車',yesNo],
+    ['evaluation','車両評価点'],['condition-note','内外装・傷のメモ','textarea']
+  ]],
+  ['price-section','価格・整備・保証',[
+    ['price','支払総額','number','円'],['base-price','車両本体価格','number','円'],['fees','諸費用','number','円'],
+    ['service','法定整備',['法定整備付','法定整備別','法定整備なし']],['service-note','法定整備の内容','textarea'],
+    ['warranty','保証',yesNo],['warranty-months','保証期間','number','か月'],['warranty-km','保証距離','number','km'],
+    ['warranty-note','保証の内容','textarea']
+  ]],
+  ['equipment','装備・安全機能',[
+    ...[
+      ['nav','カーナビ'],['back-camera','バックカメラ'],['all-camera','全周囲カメラ'],
+      ['tv','テレビ'],['bluetooth','Bluetooth'],['etc','ETC'],['dashcam','ドライブレコーダー'],
+      ['smart-key','スマートキー'],['keyless','キーレス'],['power-steering','パワーステアリング'],
+      ['power-window','パワーウィンドウ'],['ac','エアコン'],['led','LEDヘッドライト'],
+      ['alloy','アルミホイール'],['power-slide','電動スライドドア'],['seat-heater','シートヒーター'],
+      ['leather','本革シート'],['sunroof','サンルーフ'],['abs','ABS'],['airbag','エアバッグ'],
+      ['brake','衝突被害軽減ブレーキ'],['lane','レーンキープアシスト'],['cruise','クルーズコントロール'],
+      ['stability','横滑り防止装置'],['parking','駐車支援センサー']
+    ].map(([id, label]) => [id,label,yesNo]),
+    ['equipment-note','装備の確認メモ','textarea']
+  ]],
+  ['publication','掲載コメント',[
+    ['headline','掲載タイトル'],['description','紹介文','textarea']
+  ]]
+];
+
+function buildFields() {
+  const sections = document.getElementById('sections');
+  const links = document.getElementById('section-links');
+  for (const [sectionId, title, definitions] of groups) {
+    const link = document.createElement('a');
+    link.href = '#' + sectionId;
+    link.textContent = title;
+    links.append(link);
+    const section = document.createElement('section');
+    section.id = sectionId;
+    section.className = 'form-section';
+    const heading = document.createElement('h3');
+    heading.textContent = title;
+    const grid = document.createElement('div');
+    grid.className = 'fields';
+    for (const [id, label, kind = 'text', unit] of definitions) {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'field' + (kind === 'textarea' ? ' wide' : '');
+      const caption = document.createElement('label');
+      caption.htmlFor = id;
+      caption.textContent = label;
+      wrapper.append(caption);
+      const isSelect = Array.isArray(kind);
+      const control = document.createElement(isSelect ? 'select' : kind === 'textarea' ? 'textarea' : 'input');
+      control.id = id;
+      control.name = id;
+      if (isSelect) {
+        control.add(new Option('選択してください',''));
+        for (const value of kind) control.add(new Option(value,value));
+      } else if (kind === 'textarea') {
+        control.rows = 2;
+      } else {
+        control.type = kind;
+        if (kind === 'number') {
+          control.min = id === 'year' ? '1900' : '0';
+          control.step = '1';
+          if (id === 'year') control.max = '2100';
+        }
+      }
+      if (id === 'description') {
+        control.maxLength = 120;
+        const counter = document.createElement('span');
+        counter.id = 'count';
+        counter.className = 'hint';
+        const meta = document.createElement('div');
+        meta.className = 'meta';
+        meta.append(caption,counter);
+        wrapper.append(meta);
+        control.setAttribute('aria-describedby','count');
+      }
+      if (unit) {
+        const holder = document.createElement('div');
+        holder.className = 'unit';
+        const suffix = document.createElement('span');
+        suffix.textContent = unit;
+        suffix.setAttribute('aria-hidden','true');
+        control.dataset.unit = unit;
+        holder.append(control,suffix);
+        wrapper.append(holder);
+      } else {
+        wrapper.append(control);
+      }
+      grid.append(wrapper);
+    }
+    section.append(heading,grid);
+    sections.append(section);
+  }
+}
+
+buildFields();
+const fields = Array.from(form.querySelectorAll('input, select, textarea'));
+const description = document.getElementById('description');
+const progress = document.getElementById('progress');
+const count = document.getElementById('count');
+const feedback = document.getElementById('feedback');
+const review = document.getElementById('review');
+const reviewList = document.getElementById('review-list');
+const demoValues = {
+  stock:'A-01',make:'トヨタ',model:'ヤリス',grade:'1.5 ハイブリッド G',
+  year:'2020','first-month':'2020-08',body:'ハッチバック',color:'ホワイト',
+  displacement:'1490',drive:'2WD',transmission:'CVT',fuel:'ハイブリッド',
+  steering:'右',doors:'5',capacity:'5',mileage:'42300',
+  inspection:'車検あり','inspection-expiry':'2027-08',smoke:'あり',records:'あり',
+  'condition-note':'左後ろのドアに小傷があります。修復歴は要確認。',
+  'service-note':'法定整備の有無と内容は要確認。',
+  nav:'あり','back-camera':'あり',bluetooth:'あり',etc:'あり',
+  'smart-key':'あり','power-steering':'あり','power-window':'あり',ac:'あり',
+  abs:'あり',airbag:'あり',stability:'あり',sunroof:'なし',
+  'equipment-note':'ナビは装着済み。動作は要確認。',
+  headline:'トヨタ ヤリス 1.5 ハイブリッド G',
+  description:'2020年式、走行距離42,300 kmのヤリス ハイブリッドです。バックカメラとETCを装備しています。左後ろのドアに小傷があります。'
+};
+const demoLines = groups.map(([, title, definitions]) => {
+  const pairs = definitions.filter(([id]) => Object.hasOwn(demoValues,id))
+    .map(([id,label]) => label + '＝' + demoValues[id]);
+  return '【' + title + '】' + pairs.join(' ／ ');
+});
+const prompt = [
+  'ブラウザーで開いている「中古車の新規掲載」の練習用フォームを操作してください。以下は架空車両の入力データです。画面上のラベルに対応する欄だけを入力してください。',
+  ...demoLines,
+  '数値欄には数字だけを入力してください。上にない項目は空欄にしてください。特に支払総額・車両本体価格・諸費用・修復歴は空欄です。ナビは装着済みですが動作は未確認なので、装備の確認メモにそのまま残してください。入力後はフォームを再確認し、入力済み件数と入力できなかった項目を報告してください。確認ボタンは押さず、フォーム画面で止まってください。'
+].join('\n\n');
+
+function updateFields() {
+  let filled = 0;
+  for (const field of fields) {
+    const hasValue = field.value.trim().length > 0;
+    field.classList.toggle('filled', hasValue);
+    filled += Number(hasValue);
+  }
+  progress.textContent = '入力済み ' + filled + ' / ' + fields.length + ' 項目';
+  count.textContent = description.value.length + ' / 120 字';
+}
+
+form.addEventListener('input', updateFields);
+form.addEventListener('change', updateFields);
+form.addEventListener('reset', () => requestAnimationFrame(updateFields));
+form.addEventListener('submit', (event) => {
+  event.preventDefault();
+  reviewList.replaceChildren();
+  for (const field of fields) {
+    const label = document.createElement('dt');
+    const value = document.createElement('dd');
+    label.textContent = field.labels[0].textContent;
+    value.textContent = field.value.trim() ? field.value + (field.dataset.unit ? ' ' + field.dataset.unit : '') : '未入力';
+    reviewList.append(label, value);
+  }
+  review.showModal();
+});
+
+document.getElementById('copy').addEventListener('click', async () => {
+  try {
+    await navigator.clipboard.writeText(prompt);
+    feedback.textContent = '指示文をコピーしました。';
+  } catch {
+    const manual = document.getElementById('manual-prompt');
+    const promptText = document.getElementById('prompt-text');
+    promptText.value = prompt;
+    manual.showModal();
+    promptText.select();
+  }
+});
+
+updateFields();
+</script>
+</body>
+</html>
